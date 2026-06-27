@@ -2,13 +2,14 @@ from __future__ import annotations
 import sys
 from .config import load_settings
 from .auth import TokenProvider
-from .server import build_server
+from .server import build_server, configure_logging
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     cmd = argv[0] if argv else "serve"
     settings = load_settings()
+    configure_logging(settings)
     if cmd == "login":
         TokenProvider(settings).login()
         print("Login successful; token cached.", file=sys.stderr)
