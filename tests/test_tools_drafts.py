@@ -51,3 +51,19 @@ async def test_add_attachment(ctx, tmp_path):
     assert body["@odata.type"] == "#microsoft.graph.fileAttachment"
     assert body["name"] == "f.txt"
     assert body["contentBytes"] == "aGVsbG8="  # base64 of "hello"
+
+@respx.mock
+async def test_update_draft_omits_unset_fields(ctx):
+    route = respx.patch("https://graph.microsoft.com/v1.0/me/messages/d1").mock(
+        return_value=httpx.Response(200, json={"id": "d1"}))
+    await ctx.call_tool("update_draft", {"draft_id": "d1", "subject": "New"})
+    body = json.loads(route.calls.last.request.read())
+    assert body["subject"] == "New"
+    assert "body" not in body
+
+@respx.mock
+async def test_send_draft_returns_sent(ctx):
+    respx.post("https://graph.microsoft.com/v1.0/me/messages/d1/send").mock(
+        return_value=httpx.Response(202))
+    result = await ctx.call_tool("send_draft", {"draft_id": "d1"})
+    assert json.loads(result[0].text) == {"sent": "d1"}

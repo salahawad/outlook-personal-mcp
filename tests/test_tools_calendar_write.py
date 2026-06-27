@@ -53,3 +53,24 @@ async def test_find_availability(ctx):
         "start": "2026-07-01T09:00:00", "end": "2026-07-01T17:00:00"})
     assert json.loads(route.calls.last.request.read())["schedules"] == ["a@x.com"]
     assert "a@x.com" in str(res)
+
+@respx.mock
+async def test_update_event_partial_patch(ctx):
+    route = respx.patch("https://graph.microsoft.com/v1.0/me/events/e1").mock(
+        return_value=httpx.Response(200, json={"id": "e1", "subject": "X",
+            "start": {"dateTime": "x", "timeZone": "UTC"},
+            "end": {"dateTime": "y", "timeZone": "UTC"}}))
+    await ctx.call_tool("update_event", {"event_id": "e1", "start": "2026-07-02T10:00:00",
+                                         "time_zone": "UTC"})
+    body = json.loads(route.calls.last.request.read())
+    assert body["start"] == {"dateTime": "2026-07-02T10:00:00", "timeZone": "UTC"}
+    assert "subject" not in body
+    assert "end" not in body
+
+async def test_respond_event_rejects_bad_response(ctx):
+    from mcp.server.fastmcp.exceptions import ToolError
+    with pytest.raises(ToolError) as ei:
+        await ctx.call_tool("respond_event", {"event_id": "e1", "response": "maybe"})
+    assert "accept" in str(ei.value)
+    assert "decline" in str(ei.value)
+    assert "tentative" in str(ei.value)

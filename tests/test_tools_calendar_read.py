@@ -41,3 +41,10 @@ async def test_get_event(ctx):
             "end": {"dateTime": "y", "timeZone": "UTC"}}))
     res = await ctx.call_tool("get_event", {"event_id": "e1"})
     assert "1:1" in str(res)
+
+@respx.mock
+async def test_search_events_quotes_query(ctx):
+    route = respx.get("https://graph.microsoft.com/v1.0/me/events").mock(
+        return_value=httpx.Response(200, json={"value": []}))
+    await ctx.call_tool("search_events", {"query": "budget"})
+    assert route.calls.last.request.url.params["$search"] == '"budget"'
