@@ -172,7 +172,7 @@ To enable it, set `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE=true` in the server's envi
 - **Token cache is a credential.** The file at `~/.config/outlook-personal-mcp/token_cache.bin` contains a long-lived refresh token. It is written with mode `600`, but treat it like a password — never commit it, never share it, and store it on an encrypted volume.
 - **Data stays local.** The server runs as a child process of Claude Code / Codex over stdio. Your mailbox content is passed directly between the MCP host and the Microsoft Graph API; no third-party relay is involved.
 - **Revocation.** To revoke access, delete the token cache file and/or navigate to [https://account.microsoft.com/permissions](https://account.microsoft.com/permissions) to remove the Azure app's consent. You can also delete the Azure app registration entirely from the portal.
-- **File paths.** `download_attachment` writes only under `OUTLOOK_MCP_FILE_ROOT` and refuses to overwrite existing files. `add_attachment` reads only regular, non-symlink files under `OUTLOOK_MCP_FILE_ROOT`. Both tools enforce `OUTLOOK_MCP_MAX_FILE_BYTES`. Review these paths before confirming any tool call that touches the filesystem.
+- **File paths.** `download_attachment` writes only under `OUTLOOK_MCP_FILE_ROOT` and refuses to overwrite existing files. `add_attachment` reads only regular, non-symlink files under `OUTLOOK_MCP_FILE_ROOT`. Relative paths are resolved under that root; absolute paths outside it (and any path traversing a symlink) are rejected. Both tools enforce `OUTLOOK_MCP_MAX_FILE_BYTES`. Review these paths before confirming any tool call that touches the filesystem.
 
 ---
 
