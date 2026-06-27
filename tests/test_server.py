@@ -16,3 +16,8 @@ async def test_whoami_registered(mcp):
     tools = await mcp.list_tools()
     names = {t.name for t in tools}
     assert "whoami" in names
+    assert "send_mail" in names
+    assert "list_events" in names
+    assert "create_event" in names
+    assert "list_folders" in names
+    assert "create_draft" in names
