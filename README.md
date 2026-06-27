@@ -38,6 +38,23 @@ An MCP server that gives Claude Code and Codex full control of a personal Outloo
    (`User.Read` is included by default; `offline_access` is requested automatically at runtime — you do not need to add it.)
 5. Copy the **Application (client) ID** from the **Overview** page. This is your `OUTLOOK_MCP_CLIENT_ID`.
 
+### Alternatively: create the app with the Azure CLI
+
+If you have the [`az` CLI](https://learn.microsoft.com/cli/azure/install-azure-cli), the whole registration is one command:
+
+```bash
+az login --use-device-code --allow-no-subscriptions   # sign in with your personal account
+
+az ad app create \
+  --display-name "outlook-personal-mcp" \
+  --sign-in-audience PersonalMicrosoftAccount \
+  --is-fallback-public-client true \
+  --required-resource-accesses '[{"resourceAppId":"00000003-0000-0000-c000-000000000000","resourceAccess":[{"id":"024d486e-b451-40bb-833d-3e66d98c5c73","type":"Scope"},{"id":"e383f46e-2787-4529-855e-0e479a3ffac0","type":"Scope"},{"id":"1ec239c2-d7c9-4623-a91a-a9775856bb36","type":"Scope"}]}]' \
+  --query appId -o tsv
+```
+
+The printed `appId` is your `OUTLOOK_MCP_CLIENT_ID`. (The GUIDs are the Microsoft Graph delegated scopes `Mail.ReadWrite`, `Mail.Send`, and `Calendars.ReadWrite`.) **Note:** a brand-new app registration takes a few minutes to propagate to Microsoft's consumer login endpoint — if your first login fails with `AADSTS700016` ("application … not found"), wait a few minutes and retry.
+
 ---
 
 ## Install & First-Time Login
