@@ -26,7 +26,7 @@ async def test_get_injects_bearer_and_parses_json(client):
 
 @respx.mock
 async def test_retries_on_429_then_succeeds(client):
-    respx.get("https://graph.microsoft.com/v1.0/me").mock(
+    route = respx.get("https://graph.microsoft.com/v1.0/me").mock(
         side_effect=[
             httpx.Response(429, headers={"Retry-After": "0"}, json={"error": {"code": "TooManyRequests"}}),
             httpx.Response(200, json={"id": "1"}),
@@ -34,6 +34,7 @@ async def test_retries_on_429_then_succeeds(client):
     )
     data = await client.get("/me")
     assert data["id"] == "1"
+    assert route.call_count == 2  # 429 then 200 — proves the retry actually happened
 
 
 @respx.mock
