@@ -1,0 +1,18 @@
+# Development artifacts — exclude from .mcpb bundle
+.venv/
+__pycache__/
+*.py[cod]
+*.pyc
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.env
+token_cache.bin
+tests/
+docs/
+.github/
+uv.lock
+PUBLISHING.md
+server.json
