@@ -1,0 +1,92 @@
+{
+  "manifest_version": "0.4",
+  "name": "outlook-personal-mcp",
+  "display_name": "Outlook Personal MCP",
+  "version": "0.1.0",
+  "description": "MCP server for a personal Outlook.com mailbox and calendar via Microsoft Graph. Read, send, and organize mail; manage drafts with attachments; create, update, and respond to calendar events; check free/busy availability. Uses per-user device-code OAuth — credentials never leave your machine.",
+  "author": {
+    "name": "Salah Awad",
+    "url": "https://github.com/salahawad"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/salahawad/outlook-personal-mcp"
+  },
+  "license": "MIT",
+  "keywords": ["outlook", "email", "calendar", "microsoft", "graph", "mail", "office365"],
+  "server": {
+    "type": "uv",
+    "entry_point": "src/outlook_personal_mcp/__main__.py",
+    "mcp_config": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "outlook-personal-mcp",
+        "outlook-personal-mcp"
+      ],
+      "env": {
+        "OUTLOOK_MCP_CLIENT_ID": "${user_config.client_id}",
+        "OUTLOOK_MCP_ALLOW_PERMANENT_DELETE": "${user_config.allow_permanent_delete}"
+      }
+    }
+  },
+  "user_config": {
+    "client_id": {
+      "type": "string",
+      "title": "Azure App Client ID",
+      "description": "Your Azure App Registration's Application (client) ID. Create a free app at https://portal.azure.com — see README for the three-minute setup.",
+      "required": true,
+      "sensitive": false
+    },
+    "allow_permanent_delete": {
+      "type": "boolean",
+      "title": "Allow Permanent Delete",
+      "description": "Enable the permanent_delete tool, which irreversibly removes messages (bypasses Deleted Items). Disabled by default for safety.",
+      "required": false,
+      "default": false
+    }
+  },
+  "tools": [
+    { "name": "whoami", "description": "Return the signed-in user's Microsoft account profile" },
+    { "name": "list_messages", "description": "List messages (newest first); optionally filter by folder or unread-only" },
+    { "name": "search_messages", "description": "Full-text search across the entire mailbox" },
+    { "name": "get_message", "description": "Get a single message; optionally include the full body" },
+    { "name": "list_attachments", "description": "List a message's attachments (id, name, size, content type)" },
+    { "name": "download_attachment", "description": "Download an attachment to a local file path you specify" },
+    { "name": "send_mail", "description": "Send an email" },
+    { "name": "reply", "description": "Reply to a message (reply_all to reply to everyone)" },
+    { "name": "forward", "description": "Forward a message to recipients with an optional comment" },
+    { "name": "move_message", "description": "Move a message to another folder" },
+    { "name": "copy_message", "description": "Copy a message to another folder" },
+    { "name": "mark_read", "description": "Mark a message read or unread" },
+    { "name": "flag_message", "description": "Flag or unflag a message" },
+    { "name": "delete_message", "description": "Delete a message (moves it to Deleted Items; reversible)" },
+    { "name": "permanent_delete", "description": "Permanently delete a message (irreversible). Only available when OUTLOOK_MCP_ALLOW_PERMANENT_DELETE=true" },
+    { "name": "list_folders", "description": "List mail folders with unread and total message counts" },
+    { "name": "create_folder", "description": "Create a mail folder, optionally nested under a parent" },
+    { "name": "rename_folder", "description": "Rename a mail folder" },
+    { "name": "delete_folder", "description": "Delete a mail folder (moves it to Deleted Items)" },
+    { "name": "create_draft", "description": "Create a draft message (not sent)" },
+    { "name": "update_draft", "description": "Update a draft's subject and/or body" },
+    { "name": "add_attachment", "description": "Attach a local file to a draft" },
+    { "name": "send_draft", "description": "Send an existing draft" },
+    { "name": "list_calendars", "description": "List the user's calendars" },
+    { "name": "list_events", "description": "List events; if start/end (ISO 8601) are given, returns that time window" },
+    { "name": "search_events", "description": "Search events by free text" },
+    { "name": "get_event", "description": "Get one event including body, attendees, and online meeting link" },
+    { "name": "create_event", "description": "Create a calendar event with optional attendees and online meeting" },
+    { "name": "update_event", "description": "Update fields on an existing event (only provided fields change)" },
+    { "name": "delete_event", "description": "Delete/cancel a calendar event" },
+    { "name": "respond_event", "description": "Respond to a meeting invite: accept, decline, or tentative" },
+    { "name": "find_availability", "description": "Get free/busy availability for a list of people over a time window" }
+  ],
+  "privacy_policies": [
+    "https://raw.githubusercontent.com/salahawad/outlook-personal-mcp/main/PRIVACY.md"
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
+}
