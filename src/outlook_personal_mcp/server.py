@@ -2,13 +2,13 @@ from __future__ import annotations
 from mcp.server.fastmcp import FastMCP
 from .auth import TokenProvider
 from .graph import GraphClient
-from .config import Settings, load_settings
+from .config import Settings
 from . import tools
 
 
 def build_server(settings: Settings) -> FastMCP:
     tokens = TokenProvider(settings)
-    client = GraphClient(tokens)
+    client = GraphClient(tokens, debug=settings.debug)
     mcp = FastMCP("outlook-personal-mcp")
 
     @mcp.tool()
@@ -24,7 +24,3 @@ def build_server(settings: Settings) -> FastMCP:
     tools.register_all(mcp, client, settings)
     return mcp
 
-
-def run():
-    settings = load_settings()
-    build_server(settings).run()  # stdio transport

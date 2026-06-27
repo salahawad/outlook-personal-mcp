@@ -54,3 +54,14 @@ async def test_delete_returns_none_on_204(client):
         return_value=httpx.Response(204)
     )
     assert await client.delete("/me/messages/1") is None
+
+
+@respx.mock
+async def test_debug_logs_method_url_status_not_token(capsys):
+    respx.get("https://graph.microsoft.com/v1.0/me").mock(
+        return_value=httpx.Response(200, json={"id": "1"}))
+    dbg = GraphClient(StubTokens(), backoff_base=0, debug=True)
+    await dbg.get("/me")
+    err = capsys.readouterr().err
+    assert "GET" in err and "/me" in err and "200" in err
+    assert "TESTTOKEN" not in err  # token must never be logged

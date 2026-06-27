@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import httpx
 
 BASE_URL = "https://graph.microsoft.com/v1.0"
@@ -21,12 +22,14 @@ class GraphClient:
         max_retries: int = 3,
         backoff_base: float = 0.5,
         timeout: float = 30.0,
+        debug: bool = False,
     ):
         self._tokens = token_provider
         self._base = base_url.rstrip("/")
         self._max_retries = max_retries
         self._backoff_base = backoff_base
         self._timeout = timeout
+        self._debug = debug
 
     async def request(
         self,
@@ -47,6 +50,8 @@ class GraphClient:
                 if headers:
                     hdrs.update(headers)
                 resp = await http.request(method, url, params=params, json=json, headers=hdrs)
+                if self._debug:
+                    print(f"[graph] {method} {url} -> {resp.status_code}", file=sys.stderr)
                 if resp.status_code in (429, 503) and attempt < self._max_retries:
                     retry_after = float(resp.headers.get("Retry-After", "0") or 0)
                     delay = max(retry_after, self._backoff_base * (2**attempt))

@@ -91,7 +91,7 @@ env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 | `OUTLOOK_MCP_AUTHORITY` | No | `https://login.microsoftonline.com/consumers` | MSAL authority URL (change only if you move to a work/school tenant) |
 | `OUTLOOK_MCP_TOKEN_CACHE` | No | `~/.config/outlook-personal-mcp/token_cache.bin` | Path to the MSAL token cache file |
 | `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE` | No | `false` | Set to `true` to enable the `permanent_delete` tool (irreversible — see below) |
-| `OUTLOOK_MCP_DEBUG` | No | `false` | Set to `true` to log raw Graph HTTP requests/responses to stderr |
+| `OUTLOOK_MCP_DEBUG` | No | `false` | Set to `true` to log each Graph request's method, URL, and HTTP status code to stderr. Never logs tokens or message content. |
 
 ---
 

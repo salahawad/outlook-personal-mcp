@@ -39,3 +39,13 @@ async def test_forward_passes_recipients(ctx):
     body = json.loads(route.calls.last.request.read())
     assert body["toRecipients"][0]["emailAddress"]["address"] == "b@x.com"
     assert body["comment"] == "fyi"
+
+
+@respx.mock
+async def test_send_mail_save_to_sent_false(ctx):
+    route = respx.post("https://graph.microsoft.com/v1.0/me/sendMail").mock(
+        return_value=httpx.Response(202))
+    await ctx.call_tool("send_mail", {"to": ["a@x.com"], "subject": "S", "body": "B",
+                                      "save_to_sent": False})
+    import json as _json
+    assert _json.loads(route.calls.last.request.read())["saveToSentItems"] is False

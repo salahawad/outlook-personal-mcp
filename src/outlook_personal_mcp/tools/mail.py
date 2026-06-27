@@ -84,8 +84,9 @@ def register(mcp, client, settings):
         cc: list[str] | None = None,
         bcc: list[str] | None = None,
         html: bool = False,
+        save_to_sent: bool = True,
     ) -> dict:
-        """Send an email."""
+        """Send an email. Set save_to_sent=False to skip saving to Sent Items."""
         payload = SendMailInput(
             to=to,
             subject=subject,
@@ -93,6 +94,7 @@ def register(mcp, client, settings):
             cc=cc or [],
             bcc=bcc or [],
             html=html,
+            save_to_sent=save_to_sent,
         ).to_graph()
         await client.post("/me/sendMail", json=payload)
         return {"sent": True, "to": to, "subject": subject}
