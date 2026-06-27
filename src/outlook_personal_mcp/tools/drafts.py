@@ -3,13 +3,22 @@ from __future__ import annotations
 import base64
 import os
 
+from mcp.types import ToolAnnotations
+
 
 def _recips(addrs):
     return [{"emailAddress": {"address": a}} for a in addrs]
 
 
 def register(mcp, client):
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="Create a draft message",
+            readOnlyHint=False,
+            destructiveHint=False,
+            openWorldHint=True,
+        )
+    )
     async def create_draft(
         to: list[str],
         subject: str,
@@ -28,7 +37,15 @@ def register(mcp, client):
         d = await client.post("/me/messages", json=msg)
         return {"id": d["id"], "subject": subject}
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="Update a draft message",
+            readOnlyHint=False,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=True,
+        )
+    )
     async def update_draft(
         draft_id: str,
         subject: str | None = None,
@@ -44,7 +61,14 @@ def register(mcp, client):
         d = await client.patch(f"/me/messages/{draft_id}", json=patch)
         return {"id": d["id"]}
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="Add an attachment to a draft",
+            readOnlyHint=False,
+            destructiveHint=False,
+            openWorldHint=True,
+        )
+    )
     async def add_attachment(draft_id: str, file_path: str) -> dict:
         """Attach a local file to a draft."""
         with open(file_path, "rb") as fh:
@@ -57,7 +81,14 @@ def register(mcp, client):
         a = await client.post(f"/me/messages/{draft_id}/attachments", json=payload)
         return {"attachment_id": a.get("id"), "name": a.get("name")}
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="Send a draft message",
+            readOnlyHint=False,
+            destructiveHint=False,
+            openWorldHint=True,
+        )
+    )
     async def send_draft(draft_id: str) -> dict:
         """Send an existing draft."""
         await client.post(f"/me/messages/{draft_id}/send")

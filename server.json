@@ -1,0 +1,48 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.salahawad/outlook-personal-mcp",
+  "title": "Outlook Personal MCP",
+  "description": "MCP server for a personal Outlook.com mailbox and calendar via the Microsoft Graph API. Supports reading, sending, and organizing mail; managing drafts with attachments; calendar events (create/update/delete/respond); and free/busy availability checks. Uses per-user device-code OAuth — credentials never leave your machine.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/salahawad/outlook-personal-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "outlook-personal-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "uvx",
+      "environmentVariables": [
+        {
+          "name": "OUTLOOK_MCP_CLIENT_ID",
+          "description": "Azure App Registration client ID (Application ID). Required. Create a free app at https://portal.azure.com — see README for the three-minute setup.",
+          "isRequired": true,
+          "isSecret": false
+        },
+        {
+          "name": "OUTLOOK_MCP_AUTHORITY",
+          "description": "Azure AD authority URL. Defaults to https://login.microsoftonline.com/consumers which covers personal Microsoft accounts (Outlook.com, Hotmail, Live). Change only if you target a different tenant.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OUTLOOK_MCP_ALLOW_PERMANENT_DELETE",
+          "description": "Set to 'true' to enable the permanent_delete tool which irrecoverably erases messages (bypasses Deleted Items). Disabled by default for safety.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OUTLOOK_MCP_DEBUG",
+          "description": "Set to 'true' to enable debug-level logging for Graph API requests and responses.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

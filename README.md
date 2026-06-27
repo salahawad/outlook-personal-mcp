@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.salahawad/outlook-personal-mcp -->
 # outlook-personal-mcp
 
 An MCP server that gives Claude Code and Codex full control of a personal Outlook.com mailbox and calendar via the Microsoft Graph API. Written in Python, speaks the MCP stdio transport, and uses per-user device-code OAuth so your credentials never leave your machine. MIT licensed.
