@@ -55,6 +55,14 @@ async def test_delete_returns_none_on_204(client):
     )
     assert await client.delete("/me/messages/1") is None
 
+async def test_rejects_absolute_url_outside_graph_base(client):
+    with pytest.raises(ValueError, match="Graph base URL"):
+        await client.get("https://example.com/me")
+
+async def test_rejects_relative_path_without_leading_slash(client):
+    with pytest.raises(ValueError, match="must start with '/'"):
+        await client.get("me")
+
 
 @respx.mock
 async def test_debug_logs_method_url_status_not_token(capsys):

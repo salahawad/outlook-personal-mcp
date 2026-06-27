@@ -26,6 +26,8 @@
       ],
       "env": {
         "OUTLOOK_MCP_CLIENT_ID": "${user_config.client_id}",
+        "OUTLOOK_MCP_FILE_ROOT": "${user_config.file_root}",
+        "OUTLOOK_MCP_MAX_FILE_BYTES": "${user_config.max_file_bytes}",
         "OUTLOOK_MCP_ALLOW_PERMANENT_DELETE": "${user_config.allow_permanent_delete}"
       }
     }
@@ -37,6 +39,21 @@
       "description": "Your Azure App Registration's Application (client) ID. Create a free app at https://portal.azure.com — see README for the three-minute setup.",
       "required": true,
       "sensitive": false
+    },
+    "file_root": {
+      "type": "string",
+      "title": "File Access Root",
+      "description": "Only files under this directory can be read by add_attachment or written by download_attachment.",
+      "required": false,
+      "default": "~/.local/share/outlook-personal-mcp/files",
+      "sensitive": false
+    },
+    "max_file_bytes": {
+      "type": "number",
+      "title": "Maximum File Bytes",
+      "description": "Maximum bytes allowed for local attachment reads and attachment downloads.",
+      "required": false,
+      "default": 3145728
     },
     "allow_permanent_delete": {
       "type": "boolean",

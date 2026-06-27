@@ -31,6 +31,18 @@
           "isSecret": false
         },
         {
+          "name": "OUTLOOK_MCP_FILE_ROOT",
+          "description": "Only files under this directory can be read by add_attachment or written by download_attachment. Defaults to ~/.local/share/outlook-personal-mcp/files.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OUTLOOK_MCP_MAX_FILE_BYTES",
+          "description": "Maximum bytes allowed for local attachment reads and attachment downloads. Defaults to 3145728.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
           "name": "OUTLOOK_MCP_ALLOW_PERMANENT_DELETE",
           "description": "Set to 'true' to enable the permanent_delete tool which irrecoverably erases messages (bypasses Deleted Items). Disabled by default for safety.",
           "isRequired": false,

@@ -39,8 +39,9 @@ When you use this server:
 
 ## Local file access
 
-- The `download_attachment` tool writes an email attachment to a local file path that you or your AI agent provides.
-- The `add_attachment` tool reads a local file from a path that you or your AI agent provides.
+- The `download_attachment` tool writes an email attachment to a local file path under `OUTLOOK_MCP_FILE_ROOT` and refuses to overwrite existing files.
+- The `add_attachment` tool reads a regular, non-symlink local file under `OUTLOOK_MCP_FILE_ROOT`.
+- Both tools enforce `OUTLOOK_MCP_MAX_FILE_BYTES` to bound local file reads and attachment downloads.
 - The server does not scan, index, or transmit any other files on your system.
 
 ---

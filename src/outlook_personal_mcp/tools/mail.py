@@ -3,6 +3,7 @@ from __future__ import annotations
 from mcp.types import ToolAnnotations
 
 from ..models import SendMailInput, shape_message
+from ..safety import ensure_size_within_limit, graph_id, resolve_write_file
 
 _LIST_SELECT = "id,subject,from,isRead,receivedDateTime,bodyPreview,hasAttachments"
 
@@ -24,7 +25,7 @@ def register(mcp, client, settings):
         unread_only: bool = False,
     ) -> list[dict]:
         """List messages (newest first). Optionally restrict to a folder or unread only."""
-        path = f"/me/mailFolders/{folder_id}/messages" if folder_id else "/me/messages"
+        path = f"/me/mailFolders/{graph_id(folder_id, name='folder_id')}/messages" if folder_id else "/me/messages"
         params = {
             "$top": top,
             "$skip": skip,
@@ -61,7 +62,8 @@ def register(mcp, client, settings):
     async def get_message(message_id: str, include_body: bool = True) -> dict:
         """Get a single message; include_body returns the full body text/HTML."""
         sel = _LIST_SELECT + (",body,toRecipients,ccRecipients" if include_body else "")
-        m = await client.get(f"/me/messages/{message_id}", params={"$select": sel})
+        mid = graph_id(message_id, name="message_id")
+        m = await client.get(f"/me/messages/{mid}", params={"$select": sel})
         out = shape_message(m)
         if include_body:
             out["body"] = (m.get("body") or {}).get("content")
@@ -78,8 +80,9 @@ def register(mcp, client, settings):
     )
     async def list_attachments(message_id: str) -> list[dict]:
         """List a message's attachments (id, name, size, contentType)."""
+        mid = graph_id(message_id, name="message_id")
         data = await client.get(
-            f"/me/messages/{message_id}/attachments",
+            f"/me/messages/{mid}/attachments",
             params={"$select": "id,name,size,contentType"},
         )
         return [
@@ -104,13 +107,17 @@ def register(mcp, client, settings):
         message_id: str, attachment_id: str, save_path: str
     ) -> dict:
         """Download an attachment to a local file path."""
+        mid = graph_id(message_id, name="message_id")
+        aid = graph_id(attachment_id, name="attachment_id")
+        target = resolve_write_file(settings, save_path)
         raw = await client.get(
-            f"/me/messages/{message_id}/attachments/{attachment_id}/$value",
+            f"/me/messages/{mid}/attachments/{aid}/$value",
             raw=True,
         )
-        with open(save_path, "wb") as fh:
+        ensure_size_within_limit(settings, raw, label="attachment")
+        with open(target, "xb") as fh:
             fh.write(raw)
-        return {"saved": save_path, "bytes": len(raw)}
+        return {"saved": str(target), "bytes": len(raw)}
 
     # ---------- send ----------
     @mcp.tool(
@@ -156,8 +163,9 @@ def register(mcp, client, settings):
     ) -> dict:
         """Reply to a message (set reply_all to reply to everyone)."""
         action = "replyAll" if reply_all else "reply"
+        mid = graph_id(message_id, name="message_id")
         await client.post(
-            f"/me/messages/{message_id}/{action}", json={"comment": comment}
+            f"/me/messages/{mid}/{action}", json={"comment": comment}
         )
         return {"replied": message_id, "reply_all": reply_all}
 
@@ -173,11 +181,12 @@ def register(mcp, client, settings):
         message_id: str, to: list[str], comment: str = ""
     ) -> dict:
         """Forward a message to recipients with an optional comment."""
+        mid = graph_id(message_id, name="message_id")
         payload = {
             "comment": comment,
             "toRecipients": [{"emailAddress": {"address": a}} for a in to],
         }
-        await client.post(f"/me/messages/{message_id}/forward", json=payload)
+        await client.post(f"/me/messages/{mid}/forward", json=payload)
         return {"forwarded": message_id, "to": to}
 
     # ---------- organize ----------
@@ -194,8 +203,9 @@ def register(mcp, client, settings):
         message_id: str, destination_folder_id: str
     ) -> dict:
         """Move a message to another folder."""
+        mid = graph_id(message_id, name="message_id")
         m = await client.post(
-            f"/me/messages/{message_id}/move",
+            f"/me/messages/{mid}/move",
             json={"destinationId": destination_folder_id},
         )
         return {"id": (m or {}).get("id"), "moved_to": destination_folder_id}
@@ -212,8 +222,9 @@ def register(mcp, client, settings):
         message_id: str, destination_folder_id: str
     ) -> dict:
         """Copy a message to another folder."""
+        mid = graph_id(message_id, name="message_id")
         m = await client.post(
-            f"/me/messages/{message_id}/copy",
+            f"/me/messages/{mid}/copy",
             json={"destinationId": destination_folder_id},
         )
         return {"id": (m or {}).get("id"), "copied_to": destination_folder_id}
@@ -229,7 +240,8 @@ def register(mcp, client, settings):
     )
     async def mark_read(message_id: str, read: bool = True) -> dict:
         """Mark a message read (read=True) or unread (read=False)."""
-        await client.patch(f"/me/messages/{message_id}", json={"isRead": read})
+        mid = graph_id(message_id, name="message_id")
+        await client.patch(f"/me/messages/{mid}", json={"isRead": read})
         return {"id": message_id, "is_read": read}
 
     @mcp.tool(
@@ -244,8 +256,9 @@ def register(mcp, client, settings):
     async def flag_message(message_id: str, flagged: bool = True) -> dict:
         """Flag or unflag a message."""
         status = "flagged" if flagged else "notFlagged"
+        mid = graph_id(message_id, name="message_id")
         await client.patch(
-            f"/me/messages/{message_id}", json={"flag": {"flagStatus": status}}
+            f"/me/messages/{mid}", json={"flag": {"flagStatus": status}}
         )
         return {"id": message_id, "flagged": flagged}
 
@@ -259,7 +272,8 @@ def register(mcp, client, settings):
     )
     async def delete_message(message_id: str) -> dict:
         """Delete a message (moves it to Deleted Items; reversible)."""
-        await client.delete(f"/me/messages/{message_id}")
+        mid = graph_id(message_id, name="message_id")
+        await client.delete(f"/me/messages/{mid}")
         return {"deleted": message_id, "permanent": False}
 
     if settings.allow_permanent_delete:
@@ -276,5 +290,6 @@ def register(mcp, client, settings):
         )
         async def permanent_delete(message_id: str) -> dict:
             """PERMANENTLY delete a message (irreversible). Enabled via env flag."""
-            await client.post(f"/me/messages/{message_id}/permanentDelete")
+            mid = graph_id(message_id, name="message_id")
+            await client.post(f"/me/messages/{mid}/permanentDelete")
             return {"deleted": message_id, "permanent": True}

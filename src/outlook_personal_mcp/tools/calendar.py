@@ -3,6 +3,7 @@ from __future__ import annotations
 from mcp.types import ToolAnnotations
 
 from ..models import EventInput, shape_event
+from ..safety import graph_id
 
 _SELECT = "id,subject,start,end,location,isAllDay,organizer"
 _RESPONSE_ACTIONS = {"accept": "accept", "decline": "decline", "tentative": "tentativelyAccept"}
@@ -68,7 +69,8 @@ def register(mcp, client):
     )
     async def get_event(event_id: str) -> dict:
         """Get one event including body and attendees."""
-        e = await client.get(f"/me/events/{event_id}",
+        eid = graph_id(event_id, name="event_id")
+        e = await client.get(f"/me/events/{eid}",
                              params={"$select": _SELECT + ",body,attendees,onlineMeeting"})
         out = shape_event(e)
         out["body"] = (e.get("body") or {}).get("content")
@@ -118,7 +120,8 @@ def register(mcp, client):
             patch["end"] = {"dateTime": end, "timeZone": time_zone}
         if location is not None:
             patch["location"] = {"displayName": location}
-        e = await client.patch(f"/me/events/{event_id}", json=patch)
+        eid = graph_id(event_id, name="event_id")
+        e = await client.patch(f"/me/events/{eid}", json=patch)
         return shape_event(e)
 
     @mcp.tool(
@@ -131,7 +134,8 @@ def register(mcp, client):
     )
     async def delete_event(event_id: str) -> dict:
         """Delete/cancel a calendar event."""
-        await client.delete(f"/me/events/{event_id}")
+        eid = graph_id(event_id, name="event_id")
+        await client.delete(f"/me/events/{eid}")
         return {"deleted": event_id}
 
     @mcp.tool(
@@ -148,7 +152,8 @@ def register(mcp, client):
         action = _RESPONSE_ACTIONS.get(response)
         if not action:
             raise ValueError("response must be accept, decline, or tentative")
-        await client.post(f"/me/events/{event_id}/{action}",
+        eid = graph_id(event_id, name="event_id")
+        await client.post(f"/me/events/{eid}/{action}",
                           json={"comment": comment, "sendResponse": send_response})
         return {"event_id": event_id, "response": response}
 

@@ -31,6 +31,15 @@ class GraphClient:
         self._timeout = timeout
         self._debug = debug
 
+    def _url_for_path(self, path: str) -> str:
+        if path.startswith(("http://", "https://")):
+            if path == self._base or path.startswith(f"{self._base}/"):
+                return path
+            raise ValueError("GraphClient absolute URLs must stay under the configured Graph base URL")
+        if not path.startswith("/"):
+            raise ValueError("GraphClient paths must start with '/'")
+        return f"{self._base}{path}"
+
     async def request(
         self,
         method: str,
@@ -41,7 +50,7 @@ class GraphClient:
         headers=None,
         raw: bool = False,
     ):
-        url = path if path.startswith("http") else f"{self._base}{path}"
+        url = self._url_for_path(path)
         attempt = 0
         async with httpx.AsyncClient(timeout=self._timeout) as http:
             while True:

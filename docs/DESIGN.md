@@ -5,7 +5,7 @@
 > **personal Microsoft / Outlook.com mailbox and calendar** via the Microsoft
 > Graph API.
 >
-> Status: **approved design** (2026-06-27). Implementation pending.
+> Status: **implemented v0.1.0** (2026-06-27).
 
 ## 1. Goals & non-goals
 
@@ -91,6 +91,9 @@ mockable.
   `~/.config/outlook-personal-mcp/token_cache.bin`, created `chmod 600`. Path
   overridable via `OUTLOOK_MCP_TOKEN_CACHE`. Silent refresh on every call;
   re-prompt only when the refresh token is gone/expired.
+- **Local file access:** attachment reads and writes are limited to
+  `OUTLOOK_MCP_FILE_ROOT` and bounded by `OUTLOOK_MCP_MAX_FILE_BYTES`. Symlink
+  paths are rejected and downloads refuse to overwrite existing files.
 
 ## 5. Tool catalog (v1 — full mailbox + calendar)
 
@@ -99,16 +102,16 @@ Identity: `whoami`.
 Folders: `list_folders`, `create_folder`, `rename_folder`, `delete_folder`.
 
 Read: `list_messages` (folder + filter/top/skip), `search_messages` (Graph
-`$search`), `get_message` (optional full body + attachment metadata),
+`$search`), `get_message` (optional full body), `list_attachments`,
 `download_attachment`.
 
-Compose/send: `send_mail` (to/cc/bcc, subject, html|text body, attachments),
-`reply`, `reply_all`, `forward`.
+Compose/send: `send_mail` (to/cc/bcc, subject, html|text body), `reply`
+(`reply_all=True`), `forward`.
 
-Drafts: `create_draft`, `update_draft`, `send_draft`.
+Drafts: `create_draft`, `update_draft`, `add_attachment`, `send_draft`.
 
-Organize: `move_message`, `copy_message`, `mark_read`, `mark_unread`,
-`flag_message`.
+Organize: `move_message`, `copy_message`, `mark_read` (`read=False` marks
+unread), `flag_message`.
 
 Delete: `delete_message` (→ Deleted Items, reversible). **`permanent_delete`**
 (hard delete) is registered **only when** `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE=true`
@@ -123,9 +126,9 @@ calendar delete tool removes the event (cancellation notices follow Graph's norm
 behavior for organizer vs attendee); it is **not** gated behind the permanent-delete
 flag since calendar deletes are not destructive to mail data.
 
-Each tool has a pydantic input model; outputs are compact JSON (ids, subjects,
-from/to, received time, preview) rather than raw Graph payloads, to keep token use
-low. `get_message` can return full content on request.
+Outputs are compact JSON (ids, subjects, from/to, received time, preview) rather
+than raw Graph payloads, to keep token use low. `get_message` can return full
+content on request.
 
 ## 6. Error handling
 
@@ -148,6 +151,8 @@ Environment variables (read by `config.py`):
 | `OUTLOOK_MCP_CLIENT_ID` | **yes** | — | Azure app (public client) id. |
 | `OUTLOOK_MCP_AUTHORITY` | no | `…/consumers` | Token authority. |
 | `OUTLOOK_MCP_TOKEN_CACHE` | no | `~/.config/outlook-personal-mcp/token_cache.bin` | Token cache path. |
+| `OUTLOOK_MCP_FILE_ROOT` | no | `~/.local/share/outlook-personal-mcp/files` | Root directory for attachment file reads/writes. |
+| `OUTLOOK_MCP_MAX_FILE_BYTES` | no | `3145728` | Maximum bytes for attachment file reads/writes. |
 | `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE` | no | `false` | Register the hard-delete tool. |
 | `OUTLOOK_MCP_DEBUG` | no | `false` | Verbose (still redacts secrets). |
 

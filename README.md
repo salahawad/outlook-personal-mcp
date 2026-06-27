@@ -91,6 +91,8 @@ env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 | `OUTLOOK_MCP_CLIENT_ID` | **Yes** | — | Azure app's Application (client) ID |
 | `OUTLOOK_MCP_AUTHORITY` | No | `https://login.microsoftonline.com/consumers` | MSAL authority URL (change only if you move to a work/school tenant) |
 | `OUTLOOK_MCP_TOKEN_CACHE` | No | `~/.config/outlook-personal-mcp/token_cache.bin` | Path to the MSAL token cache file |
+| `OUTLOOK_MCP_FILE_ROOT` | No | `~/.local/share/outlook-personal-mcp/files` | Only files under this directory can be read by `add_attachment` or written by `download_attachment` |
+| `OUTLOOK_MCP_MAX_FILE_BYTES` | No | `3145728` | Maximum bytes allowed for local attachment reads and attachment downloads |
 | `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE` | No | `false` | Set to `true` to enable the `permanent_delete` tool (irreversible — see below) |
 | `OUTLOOK_MCP_DEBUG` | No | `false` | Set to `true` to log each Graph request's method, URL, and HTTP status code to stderr. Never logs tokens or message content. |
 
@@ -112,7 +114,7 @@ env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 | `search_messages` | Full-text search across the entire mailbox (Graph `$search`) |
 | `get_message` | Get a single message; optionally include the full body |
 | `list_attachments` | List a message's attachments (id, name, size, content type) |
-| `download_attachment` | Download an attachment to a local file path you specify |
+| `download_attachment` | Download an attachment to a path under `OUTLOOK_MCP_FILE_ROOT` (refuses to overwrite an existing file) |
 | `send_mail` | Send an email |
 | `reply` | Reply to a message (`reply_all` to reply to everyone) |
 | `forward` | Forward a message to recipients with an optional comment |
@@ -138,7 +140,7 @@ env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 |---|---|
 | `create_draft` | Create a draft message (not sent) |
 | `update_draft` | Update a draft's subject and/or body |
-| `add_attachment` | Attach a local file to a draft |
+| `add_attachment` | Attach a local file (a regular, non-symlink file under `OUTLOOK_MCP_FILE_ROOT`) to a draft |
 | `send_draft` | Send an existing draft |
 
 ### Calendar
@@ -170,7 +172,7 @@ To enable it, set `OUTLOOK_MCP_ALLOW_PERMANENT_DELETE=true` in the server's envi
 - **Token cache is a credential.** The file at `~/.config/outlook-personal-mcp/token_cache.bin` contains a long-lived refresh token. It is written with mode `600`, but treat it like a password — never commit it, never share it, and store it on an encrypted volume.
 - **Data stays local.** The server runs as a child process of Claude Code / Codex over stdio. Your mailbox content is passed directly between the MCP host and the Microsoft Graph API; no third-party relay is involved.
 - **Revocation.** To revoke access, delete the token cache file and/or navigate to [https://account.microsoft.com/permissions](https://account.microsoft.com/permissions) to remove the Azure app's consent. You can also delete the Azure app registration entirely from the portal.
-- **File paths.** `download_attachment` writes to a local path you provide. `add_attachment` reads from a local path you provide. Review these paths before confirming any tool call that touches the filesystem.
+- **File paths.** `download_attachment` writes only under `OUTLOOK_MCP_FILE_ROOT` and refuses to overwrite existing files. `add_attachment` reads only regular, non-symlink files under `OUTLOOK_MCP_FILE_ROOT`. Both tools enforce `OUTLOOK_MCP_MAX_FILE_BYTES`. Review these paths before confirming any tool call that touches the filesystem.
 
 ---
 

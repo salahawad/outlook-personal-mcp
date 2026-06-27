@@ -44,8 +44,9 @@ git push origin v0.1.0
 Alternatively, create a GitHub Release via the web UI and publish it. Either trigger fires `publish.yml`, which:
 
 1. Checks out the repo and sets up `uv`.
-2. Runs `uv build` to produce `dist/outlook_personal_mcp-<version>-py3-none-any.whl` and `dist/outlook_personal_mcp-<version>.tar.gz`.
-3. Publishes both to PyPI via `pypa/gh-action-pypi-publish@release/v1` using OIDC (no token required).
+2. Installs dev dependencies, runs `ruff`, and runs the pytest suite.
+3. Runs `uv build` to produce `dist/outlook_personal_mcp-<version>-py3-none-any.whl` and `dist/outlook_personal_mcp-<version>.tar.gz`.
+4. Publishes both to PyPI via `pypa/gh-action-pypi-publish@release/v1` using OIDC (no token required).
 
 The `README.md` (referenced as `readme = "README.md"` in `pyproject.toml`) becomes the PyPI long-description automatically. It contains the `<!-- mcp-name: ... -->` marker that the MCP Registry needs for validation.
 

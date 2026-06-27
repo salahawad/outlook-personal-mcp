@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from mcp.types import ToolAnnotations
 
+from ..safety import graph_id
+
 
 def register(mcp, client):
     @mcp.tool(
@@ -36,7 +38,7 @@ def register(mcp, client):
     async def create_folder(name: str, parent_folder_id: str | None = None) -> dict:
         """Create a mail folder, optionally nested under parent_folder_id."""
         path = (
-            f"/me/mailFolders/{parent_folder_id}/childFolders"
+            f"/me/mailFolders/{graph_id(parent_folder_id, name='parent_folder_id')}/childFolders"
             if parent_folder_id
             else "/me/mailFolders"
         )
@@ -53,8 +55,9 @@ def register(mcp, client):
     )
     async def rename_folder(folder_id: str, new_name: str) -> dict:
         """Rename a mail folder."""
+        fid = graph_id(folder_id, name="folder_id")
         f = await client.patch(
-            f"/me/mailFolders/{folder_id}", json={"displayName": new_name}
+            f"/me/mailFolders/{fid}", json={"displayName": new_name}
         )
         return {"id": f["id"], "name": f["displayName"]}
 
@@ -68,5 +71,6 @@ def register(mcp, client):
     )
     async def delete_folder(folder_id: str) -> dict:
         """Delete a mail folder (moves it to Deleted Items)."""
-        await client.delete(f"/me/mailFolders/{folder_id}")
+        fid = graph_id(folder_id, name="folder_id")
+        await client.delete(f"/me/mailFolders/{fid}")
         return {"deleted": folder_id}

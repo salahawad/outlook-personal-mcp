@@ -5,12 +5,14 @@ import os
 
 from mcp.types import ToolAnnotations
 
+from ..safety import graph_id, resolve_read_file
+
 
 def _recips(addrs):
     return [{"emailAddress": {"address": a}} for a in addrs]
 
 
-def register(mcp, client):
+def register(mcp, client, settings):
     @mcp.tool(
         annotations=ToolAnnotations(
             title="Create a draft message",
@@ -58,7 +60,8 @@ def register(mcp, client):
             patch["subject"] = subject
         if body is not None:
             patch["body"] = {"contentType": "HTML" if html else "Text", "content": body}
-        d = await client.patch(f"/me/messages/{draft_id}", json=patch)
+        did = graph_id(draft_id, name="draft_id")
+        d = await client.patch(f"/me/messages/{did}", json=patch)
         return {"id": d["id"]}
 
     @mcp.tool(
@@ -71,14 +74,16 @@ def register(mcp, client):
     )
     async def add_attachment(draft_id: str, file_path: str) -> dict:
         """Attach a local file to a draft."""
-        with open(file_path, "rb") as fh:
+        path = resolve_read_file(settings, file_path)
+        with open(path, "rb") as fh:
             content = base64.b64encode(fh.read()).decode("ascii")
+        did = graph_id(draft_id, name="draft_id")
         payload = {
             "@odata.type": "#microsoft.graph.fileAttachment",
-            "name": os.path.basename(file_path),
+            "name": os.path.basename(path),
             "contentBytes": content,
         }
-        a = await client.post(f"/me/messages/{draft_id}/attachments", json=payload)
+        a = await client.post(f"/me/messages/{did}/attachments", json=payload)
         return {"attachment_id": a.get("id"), "name": a.get("name")}
 
     @mcp.tool(
@@ -91,5 +96,6 @@ def register(mcp, client):
     )
     async def send_draft(draft_id: str) -> dict:
         """Send an existing draft."""
-        await client.post(f"/me/messages/{draft_id}/send")
+        did = graph_id(draft_id, name="draft_id")
+        await client.post(f"/me/messages/{did}/send")
         return {"sent": draft_id}
