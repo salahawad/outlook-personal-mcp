@@ -19,7 +19,7 @@ An MCP server that gives Claude Code and Codex full control of a personal Outloo
 ## Prerequisites
 
 - Python 3.10 or later
-- [`uv`](https://docs.astral.sh/uv/) (fast Python package and tool runner)
+- [`uv`](https://docs.astral.sh/uv/) (fast Python package and tool runner) — **required at runtime**: the server is launched via `uvx`, and it is not bundled by your MCP host (including Claude Desktop). Install it with `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
 - A personal Microsoft account (Outlook.com, Hotmail, Live, etc.)
 - A free Azure app registration (see below — takes about three minutes)
 
@@ -99,6 +99,20 @@ command = "uvx"
 args = ["mcp-outlook-personal"]
 env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 ```
+
+---
+
+## Install as a Claude Desktop extension (.mcpb)
+
+This server is also packaged as a [Claude Desktop extension](https://www.anthropic.com/engineering/desktop-extensions) (`.mcpb`). Build the bundle from a checkout:
+
+```bash
+npx @anthropic-ai/mcpb pack . dist/mcp-outlook-personal.mcpb
+```
+
+Then in Claude Desktop open **Settings → Extensions**, install the `dist/mcp-outlook-personal.mcpb` file, and enter your **Azure App Client ID** (plus any optional settings) when prompted.
+
+> **Requirement:** the extension launches the server with `uvx mcp-outlook-personal`, so [`uv`](https://docs.astral.sh/uv/) must be installed and on your `PATH` — Claude Desktop does not bundle it (see [Prerequisites](#prerequisites)). Codex and other stdio hosts use the config above instead of the `.mcpb`.
 
 ---
 
