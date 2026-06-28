@@ -62,9 +62,10 @@ The printed `appId` is your `OUTLOOK_MCP_CLIENT_ID`. (The GUIDs are the Microsof
 Run the one-time interactive login. It prints a short URL and a code; open the URL in any browser, enter the code, approve the permissions, and you are done. The token is cached at `~/.config/outlook-personal-mcp/token_cache.bin` (mode 600) and refreshed automatically on subsequent runs — you will not be prompted again unless the refresh token expires or is revoked.
 
 ```bash
-OUTLOOK_MCP_CLIENT_ID=<your-app-client-id> \
-  uvx --from git+https://github.com/salahawad/outlook-personal-mcp mcp-outlook-personal login
+OUTLOOK_MCP_CLIENT_ID=<your-app-client-id> uvx mcp-outlook-personal login
 ```
+
+> To run the latest unreleased code from source instead of the PyPI release, swap `mcp-outlook-personal` for `--from git+https://github.com/salahawad/outlook-personal-mcp mcp-outlook-personal`.
 
 ---
 
@@ -77,7 +78,7 @@ Add the server to your project's `.mcp.json` (or `~/.claude/.mcp.json` for all p
   "mcpServers": {
     "outlook": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "mcp-outlook-personal"],
+      "args": ["mcp-outlook-personal"],
       "env": { "OUTLOOK_MCP_CLIENT_ID": "<your-app-client-id>" }
     }
   }
@@ -95,7 +96,7 @@ Add the server to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.outlook]
 command = "uvx"
-args = ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "mcp-outlook-personal"]
+args = ["mcp-outlook-personal"]
 env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 ```
 
