@@ -1,11 +1,35 @@
 from __future__ import annotations
 
+import html as _html
+import re
+
 from mcp.types import ToolAnnotations
 
 from ..models import SendMailInput, shape_message
 from ..safety import ensure_size_within_limit, graph_id, resolve_write_file
 
 _LIST_SELECT = "id,subject,from,isRead,receivedDateTime,bodyPreview,hasAttachments"
+
+_BODY_OPEN_RE = re.compile(r"<body[^>]*>", re.IGNORECASE)
+
+
+def _compose_draft_body(draft_body: dict, comment: str) -> dict:
+    """Prepend `comment` to a createReply/createForward draft body, preserving line breaks.
+
+    Graph's reply/forward `comment` field is dropped verbatim into the (HTML) draft body,
+    collapsing newlines. Instead we build the draft, then inject the comment as real markup:
+    escaped + ``\\n`` -> ``<br>`` for HTML drafts, kept as plain text for Text drafts.
+    """
+    ctype = draft_body.get("contentType") or "HTML"
+    content = draft_body.get("content") or ""
+    if str(ctype).lower() == "html":
+        escaped = _html.escape(comment).replace("\n", "<br>")
+        snippet = f"<div>{escaped}</div>"
+        m = _BODY_OPEN_RE.search(content)
+        new_content = content[: m.end()] + snippet + content[m.end():] if m else snippet + content
+    else:
+        new_content = f"{comment}\n\n{content}" if content else comment
+    return {"contentType": ctype, "content": new_content}
 
 
 def register(mcp, client, settings):
@@ -162,11 +186,13 @@ def register(mcp, client, settings):
         message_id: str, comment: str, reply_all: bool = False
     ) -> dict:
         """Reply to a message (set reply_all to reply to everyone)."""
-        action = "replyAll" if reply_all else "reply"
+        action = "createReplyAll" if reply_all else "createReply"
         mid = graph_id(message_id, name="message_id")
-        await client.post(
-            f"/me/messages/{mid}/{action}", json={"comment": comment}
-        )
+        draft = await client.post(f"/me/messages/{mid}/{action}")
+        did = graph_id(draft["id"], name="draft_id")
+        body = _compose_draft_body(draft.get("body") or {}, comment)
+        await client.patch(f"/me/messages/{did}", json={"body": body})
+        await client.post(f"/me/messages/{did}/send")
         return {"replied": message_id, "reply_all": reply_all}
 
     @mcp.tool(
@@ -182,11 +208,13 @@ def register(mcp, client, settings):
     ) -> dict:
         """Forward a message to recipients with an optional comment."""
         mid = graph_id(message_id, name="message_id")
-        payload = {
-            "comment": comment,
-            "toRecipients": [{"emailAddress": {"address": a}} for a in to],
-        }
-        await client.post(f"/me/messages/{mid}/forward", json=payload)
+        draft = await client.post(f"/me/messages/{mid}/createForward")
+        did = graph_id(draft["id"], name="draft_id")
+        patch = {"toRecipients": [{"emailAddress": {"address": a}} for a in to]}
+        if comment:
+            patch["body"] = _compose_draft_body(draft.get("body") or {}, comment)
+        await client.patch(f"/me/messages/{did}", json=patch)
+        await client.post(f"/me/messages/{did}/send")
         return {"forwarded": message_id, "to": to}
 
     # ---------- organize ----------
