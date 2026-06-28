@@ -220,7 +220,7 @@ uv run ruff check .
 
 ---
 
-## Privacy
+## Privacy Policy
 
 This server runs entirely on your machine and sends data only between your machine and Microsoft's Graph API — no third-party relay, no telemetry, and the maintainer receives nothing. OAuth tokens are cached locally at `~/.config/outlook-personal-mcp/token_cache.bin` (mode 600). See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 
