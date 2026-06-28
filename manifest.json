@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "outlook-personal-mcp",
   "display_name": "Outlook Personal MCP",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for a personal Outlook.com mailbox and calendar via Microsoft Graph. Read, send, and organize mail; manage drafts with attachments; create, update, and respond to calendar events; check free/busy availability. Uses per-user device-code OAuth — credentials never leave your machine.",
   "author": {
     "name": "Salah Awad",
