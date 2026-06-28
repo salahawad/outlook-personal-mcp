@@ -11,7 +11,7 @@ PyPI Trusted Publishing lets the GitHub Actions workflow publish without storing
 **Steps on pypi.org:**
 
 1. Log in to [https://pypi.org](https://pypi.org) and go to your account's **Your projects** page.
-2. Click **Manage** next to `outlook-personal-mcp`.
+2. Click **Manage** next to `mcp-outlook-personal`.
 3. Select **Publishing** in the left sidebar.
 4. Under **Add a new publisher**, fill in:
    - **Publisher:** GitHub Actions
@@ -137,7 +137,7 @@ The reviewer needs to install Claude Desktop, run the server, and exercise the t
 
 1. Create a sandbox Microsoft personal account (Outlook.com) with some test emails and calendar events.
 2. Register a free Azure app for the sandbox account following the README's "Azure App Registration" steps.
-3. Include the client ID and a note that the reviewer will need to run `outlook-personal-mcp login` once to complete the device-code flow.
+3. Include the client ID and a note that the reviewer will need to run `mcp-outlook-personal login` once to complete the device-code flow.
 
 **Submit:**
 
@@ -147,4 +147,4 @@ Include a short description, the reviewer test account instructions above, and a
 
 **Dependency note:**
 
-This extension uses `server.type = "uv"` in `manifest.json`. This means Claude Desktop will invoke `uv run --with outlook-personal-mcp outlook-personal-mcp` to launch the server, and `uv` handles downloading and caching the package and all its dependencies (`mcp`, `msal`, `httpx`, `pydantic`). No manual vendoring into a `lib/` directory is required. The host machine must have `uv` installed (or Claude Desktop must ship it); if the Desktop host does not bundle `uv`, the extension will fail to launch — this is the main portability concern for the `uv` runtime type.
+This extension uses `server.type = "uv"` in `manifest.json`. This means Claude Desktop will invoke `uv run --with mcp-outlook-personal mcp-outlook-personal` to launch the server, and `uv` handles downloading and caching the package and all its dependencies (`mcp`, `msal`, `httpx`, `pydantic`). No manual vendoring into a `lib/` directory is required. The host machine must have `uv` installed (or Claude Desktop must ship it); if the Desktop host does not bundle `uv`, the extension will fail to launch — this is the main portability concern for the `uv` runtime type.

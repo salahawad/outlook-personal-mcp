@@ -63,7 +63,7 @@ Run the one-time interactive login. It prints a short URL and a code; open the U
 
 ```bash
 OUTLOOK_MCP_CLIENT_ID=<your-app-client-id> \
-  uvx --from git+https://github.com/salahawad/outlook-personal-mcp outlook-personal-mcp login
+  uvx --from git+https://github.com/salahawad/outlook-personal-mcp mcp-outlook-personal login
 ```
 
 ---
@@ -77,7 +77,7 @@ Add the server to your project's `.mcp.json` (or `~/.claude/.mcp.json` for all p
   "mcpServers": {
     "outlook": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "outlook-personal-mcp"],
+      "args": ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "mcp-outlook-personal"],
       "env": { "OUTLOOK_MCP_CLIENT_ID": "<your-app-client-id>" }
     }
   }
@@ -95,7 +95,7 @@ Add the server to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.outlook]
 command = "uvx"
-args = ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "outlook-personal-mcp"]
+args = ["--from", "git+https://github.com/salahawad/outlook-personal-mcp", "mcp-outlook-personal"]
 env = { OUTLOOK_MCP_CLIENT_ID = "<your-app-client-id>" }
 ```
 

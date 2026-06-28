@@ -1,5 +1,5 @@
 [project]
-name = "outlook-personal-mcp"
+name = "mcp-outlook-personal"
 version = "0.1.0"
 description = "MCP server for a personal Outlook.com mailbox and calendar via Microsoft Graph"
 readme = "README.md"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-outlook-personal-mcp = "outlook_personal_mcp.__main__:main"
+mcp-outlook-personal = "outlook_personal_mcp.__main__:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "respx>=0.21", "ruff>=0.4"]

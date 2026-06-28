@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/outlook-personal-mcp
+      url: https://pypi.org/p/mcp-outlook-personal
     permissions:
       id-token: write  # Required for OIDC trusted publishing
 

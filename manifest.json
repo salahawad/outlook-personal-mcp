@@ -20,9 +20,7 @@
     "mcp_config": {
       "command": "uvx",
       "args": [
-        "--from",
-        "outlook-personal-mcp",
-        "outlook-personal-mcp"
+        "mcp-outlook-personal"
       ],
       "env": {
         "OUTLOOK_MCP_CLIENT_ID": "${user_config.client_id}",
